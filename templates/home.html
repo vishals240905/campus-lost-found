@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% from '_cards.html' import card %}
+{% block content %}
+{% if session.account_id or session.admin %}
+<section class="panel portal-welcome">
+  <h1>Campus Lost &amp; Found</h1>
+  <p>Report an item or check what’s been found on campus.</p>
+  <div class="actions">
+    {% if session.account_id %}
+    <a class="button compact dark" href="{{ url_for('report', kind='lost') }}">Report lost item</a>
+    <a class="button compact outline" href="{{ url_for('report', kind='found') }}">Report found item</a>
+    {% endif %}
+    <a class="button compact outline" href="{{ url_for('browse') }}">Browse items</a>
+  </div>
+</section>
+{% else %}
+<section class="hero">
+  <div class="hero-content">
+    <h1>Find what you lost on campus</h1>
+    <p>Find what you’ve lost or help a fellow student get something back.</p>
+    <div class="actions">
+      <a class="button primary" href="{{ url_for('account', mode='sign-in') }}">Sign in</a>
+      <a class="button light" href="{{ url_for('account', mode='register') }}">Create an account</a>
+      <a class="button hero-link" href="{{ url_for('browse') }}">Browse items</a>
+    </div>
+  </div>
+  <div class="hero-art" aria-hidden="true"><div class="orbit"></div><div class="tile"></div><div class="lens"></div><span class="spark one">✦</span><span class="spark two">✦</span><span class="spark three">✧</span></div>
+</section>
+{% endif %}
+{% if session.account_id or session.admin %}
+<form class="quick-search" action="{{ url_for('browse') }}">
+  <label for="quick-query">Search campus reports</label>
+  <div class="search-row"><input id="quick-query" name="q" type="search" placeholder="Try “black wallet” or “library”"><button class="button dark">Search</button></div>
+</form>
+{% if reports %}
+<section class="section">
+  <div class="section-heading"><h2>Recent open reports</h2><a href="{{ url_for('browse') }}">Browse all items</a></div>
+  <div class="grid">{% for item in reports %}{{ card(item) }}{% endfor %}</div>
+</section>
+{% endif %}
+{% endif %}
+<section class="section">
+  <div class="section-heading"><h2>How it works</h2></div>
+  <div class="grid">
+    <div class="panel"><h3>Report</h3><p>Describe what you lost or found and where it happened.</p></div>
+    <div class="panel"><h3>Claim</h3><p>Compare suggested matches and share a private ownership detail with staff.</p></div>
+    <div class="panel"><h3>Collect</h3><p>Once staff approve your claim, arrange pickup and check the status in My reports.</p></div>
+  </div>
+</section>
+{% endblock %}

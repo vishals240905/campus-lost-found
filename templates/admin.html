@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-heading"><h1>Admin review</h1></div>
+{% if not enabled %}
+<p>Set the administrator password before starting the app to enable claim review.</p>
+{% elif not session.admin %}
+{% if error %}<p class="notice error" role="alert">{{ error }}</p>{% endif %}
+<form class="panel report-form narrow" method="post">
+  <input type="hidden" name="csrf" value="{{ g.csrf }}">
+  <label class="full">Administrator password<input name="password" type="password" required autocomplete="current-password"></label>
+  <button class="button dark">Sign in as admin</button>
+  <a class="full" href="{{ url_for('account', mode='sign-in') }}">Back to student sign-in</a>
+</form>
+{% else %}
+{% for queue, title in [('pending', 'Pending review'), ('approved', 'Awaiting handover'), ('history', 'Claim history')] %}
+<section class="section">
+<h2>{{ title }}</h2>
+{% set entries = claims|rejectattr('status','in',('pending','approved'))|list if queue == 'history' else claims|selectattr('status','equalto',queue)|list %}
+{% for claim in entries %}
+<article class="panel match-entry">
+  <h3>{{ claim.found_name }}</h3>
+  <p><a href="{{ url_for('compare', lost_id=claim.lost_id, found_id=claim.found_id) }}">Compare with {{ claim.lost_name }}</a></p>
+  <p>{{ claim.username }} · {{ claim_labels[claim.status] }}</p>
+  <p class="claim-proof"><strong>Private ownership proof</strong><br>{{ claim.proof }}</p>
+  {% if claim.status == 'pending' and claim.blocked %}<p>Another approved claim has reserved one of these reports.</p>{% endif %}
+  {% if claim.status in ('pending', 'approved') %}
+  <div class="actions">
+    {% set actions = [('reject', 'Reject claim', 'Close this claim as rejected.')] if claim.status == 'pending' else [
+      ('return', 'Mark as returned', 'Both reports will close. Any competing pending claims will also close.'),
+      ('cancel', 'Cancel approval', 'Both reports will reopen and become available for matching.')] %}
+    {% if claim.status == 'pending' and not claim.blocked %}
+    {% set actions = [('approve', 'Approve claim', 'Reserve both reports until the handover is recorded.')] + actions %}
+    {% endif %}
+    {% for action, label, effect in actions %}
+    <details class="review-action">
+    <summary>{{ label }}</summary>
+    <form method="post" action="{{ url_for('review_claim', claim_id=claim.id, action=action) }}">
+      <input type="hidden" name="csrf" value="{{ g.csrf }}">
+      <p>{{ effect }}</p>
+      <button class="button {{ 'dark' if action in ('approve', 'return') else 'outline' }}" name="confirm" value="yes">Confirm {{ label|lower }}</button>
+    </form>
+    </details>
+    {% endfor %}
+  </div>
+  {% endif %}
+</article>
+{% else %}<p class="empty-queue">No claims in this section.</p>
+{% endfor %}
+</section>
+{% endfor %}
+{% endif %}
+{% endblock %}

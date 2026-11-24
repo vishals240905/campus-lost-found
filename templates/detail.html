@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}{{ item.name }} | Campus Lost & Found{% endblock %}
+{% block content %}
+<div class="narrow">
+  <section class="page-heading">
+    <a href="{{ url_for('browse') }}">Browse items</a>
+    <h1>{{ item.name }}</h1>
+    <span class="tag {{ item.kind }}">{{ item.kind|capitalize }}</span>
+    <span class="tag status {{ item.report_status }}">{{ report_labels[item.report_status] }}</span>
+  </section>
+  {% if posted %}<p class="notice" role="status">Your report is open. Check below for possible matches.</p>{% endif %}
+  {% if item.report_status == 'reserved' %}<p class="notice">Campus staff approved a claim. This report is awaiting handover and cannot accept new claims.</p>{% endif %}
+  {% if item.report_status == 'returned' %}<p class="notice">The item was handed back. This report is available in your history.</p>{% endif %}
+  <article class="panel detail">
+    {% if item.photo %}<img src="{{ url_for('photo', filename=item.photo) }}" alt="{{ item.name }}">{% endif %}
+    <dl>
+      <div><dt>Category</dt><dd>{{ item.category }}</dd></div>
+      <div><dt>Colour</dt><dd>{{ item.colour }}</dd></div>
+      <div><dt>Location</dt><dd>{{ item.location }}</dd></div>
+      <div><dt>Date {{ item.kind }}</dt><dd><time datetime="{{ item.day }}">{{ item.day }}</time></dd></div>
+    </dl>
+    <h2>Description</h2><p>{{ item.description }}</p>
+  </article>
+  {% if item.report_status == 'open' and session.account_id and session.account_id == item.owner_id %}
+  <details class="panel section review-action">
+    <summary>Delete report</summary>
+    <form method="post" action="{{ url_for('withdraw_report', report_id=item.id) }}">
+      <input type="hidden" name="csrf" value="{{ g.csrf }}">
+      <p>This will remove the report from Browse, matching, and My reports. Any pending claims on it will close.</p>
+      <button class="button outline" name="confirm" value="yes">Confirm delete report</button>
+    </form>
+  </details>
+  {% endif %}
+  {% if item.report_status == 'open' %}
+  <section class="section">
+    <div class="section-heading"><h2>Possible matches</h2></div>
+    {% for candidate, reasons, lost_id, found_id in matches %}
+    <article class="panel match-entry">
+      <h3><a href="{{ url_for('compare', lost_id=lost_id, found_id=found_id) }}">{{ candidate.name }}</a></h3>
+      <p>{{ reasons|join(' · ') }}</p>
+    </article>
+    {% else %}<p>No matching reports yet.</p>{% endfor %}
+  </section>
+  {% endif %}
+</div>
+{% endblock %}

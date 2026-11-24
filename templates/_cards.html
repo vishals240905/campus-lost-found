@@ -1,0 +1,14 @@
+{% macro card(item) %}
+<article class="card">
+  {% if item.photo %}
+    <img class="card-photo" src="{{ url_for('photo', filename=item.photo) }}" alt="{{ item.name }}" loading="lazy">
+  {% endif %}
+  <div class="card-body">
+    <div class="card-top"><span class="tag {{ item.kind }}">{{ item.kind|capitalize }}</span><time datetime="{{ item.day }}">{{ item.day }}</time></div>
+    <span class="tag status {{ item.report_status }}">{{ report_labels[item.report_status] }}</span>
+    <h3><a href="{{ url_for('detail', report_id=item.id) }}">{{ item.name }}</a></h3>
+    <p class="location">{{ item.location }} <span aria-hidden="true">·</span> {{ item.category }}</p>
+    <p class="excerpt">{{ item.description|truncate(125) }}</p>
+  </div>
+</article>
+{% endmacro %}

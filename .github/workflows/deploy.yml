@@ -1,0 +1,28 @@
+name: Deploy to Learner Lab EC2
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: campus-lost-found-ec2
+  cancel-in-progress: false
+
+jobs:
+  test:
+    if: github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/ci.yml
+
+  deploy:
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    runs-on: [self-hosted, linux, campus-learner-lab]
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Update the existing EC2 deployment
+        run: python3 deploy_ec2.py

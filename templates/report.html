@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Report {{ kind }} item | Campus Lost & Found{% endblock %}
+{% block content %}
+<div class="narrow">
+  <section class="page-heading">
+    <h1>Report {{ 'a lost' if kind == 'lost' else 'a found' }} item</h1>
+    <p>All fields are required except the photo.</p>
+    <p><a href="{{ url_for('report', kind='found' if kind == 'lost' else 'lost') }}">{{ 'Report a found item instead' if kind == 'lost' else 'Report a lost item instead' }}</a></p>
+  </section>
+  {% if errors %}<ul class="notice error" role="alert">{% for error in errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+  <form class="panel report-form" method="post" enctype="multipart/form-data">
+    <input type="hidden" name="csrf" value="{{ g.csrf }}">
+    <label class="full">Item name<input name="name" required maxlength="100" placeholder="e.g. Black wallet" value="{{ values.name }}"></label>
+    <label>Category<select name="category" required><option value="">Choose a category</option>{% for option in categories %}<option {% if values.category == option %}selected{% endif %}>{{ option }}</option>{% endfor %}</select></label>
+    <label>Colour<input name="colour" required maxlength="40" placeholder="e.g. Black" value="{{ values.colour }}"></label>
+    <label>Campus location<select name="location" required><option value="">Choose a location</option>{% for option in locations %}<option {% if values.location == option %}selected{% endif %}>{{ option }}</option>{% endfor %}</select></label>
+    <label>Date {{ kind }}<input type="date" name="day" required max="{{ today }}" value="{{ values.day }}"></label>
+    <label class="full">Description<textarea name="description" required maxlength="1000" rows="4" placeholder="Describe the item and where you last saw it or found it.">{{ values.description }}</textarea></label>
+    <label class="full">Photo (optional)<input type="file" name="photo" accept="image/jpeg,image/png,image/webp" aria-describedby="photo-help"><small id="photo-help">JPEG, PNG or WebP. Keep the photo under 6 MB.</small></label>
+    <div class="actions full"><button class="button dark">Submit report</button><a class="button outline" href="{{ url_for('browse') }}">Cancel</a></div>
+  </form>
+</div>
+{% endblock %}

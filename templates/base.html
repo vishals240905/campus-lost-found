@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Campus Lost & Found{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <nav class="wrap navigation" aria-label="Main navigation">
+      <a class="brand" href="{{ url_for('home') }}"><span class="brand-icon" aria-hidden="true">✦</span> Campus Lost &amp; Found</a>
+      {% if session.account_id or session.admin %}
+      <div class="nav-links">
+        <details class="account-menu">
+          <summary>{{ 'Admin account' if session.admin else 'Account' }}</summary>
+          <div class="account-panel">
+            {% if session.admin %}<a href="{{ url_for('admin') }}">Review claims</a>{% endif %}
+            <form action="{{ url_for('sign_out') }}" method="post">
+              <input type="hidden" name="csrf" value="{{ g.csrf }}">
+              <button type="submit">Sign out</button>
+            </form>
+          </div>
+        </details>
+      </div>
+      {% endif %}
+    </nav>
+  </header>
+  <div class="wrap {% if session.account_id or session.admin %}portal-layout{% endif %}">
+    {% if session.account_id or session.admin %}
+    {% set current_kind = request.view_args.get('kind') if request.view_args else none %}
+    <aside class="portal-sidebar">
+      <nav aria-label="Campus portal">
+        <a class="nav-link" {% if request.endpoint == 'home' %}aria-current="page"{% endif %} href="{{ url_for('home') }}">Home</a>
+        {% if session.account_id %}
+        <a class="nav-link" {% if current_kind == 'lost' %}aria-current="page"{% endif %} href="{{ url_for('report', kind='lost') }}">Report lost item</a>
+        <a class="nav-link" {% if current_kind == 'found' %}aria-current="page"{% endif %} href="{{ url_for('report', kind='found') }}">Report found item</a>
+        {% endif %}
+        <a class="nav-link" {% if request.endpoint in ('browse', 'detail', 'compare') %}aria-current="true"{% endif %} href="{{ url_for('browse') }}">Browse items</a>
+        {% if session.account_id %}
+        <a class="nav-link" {% if request.endpoint == 'my_reports' %}aria-current="page"{% endif %} href="{{ url_for('my_reports') }}">My reports</a>
+        {% else %}
+        <a class="nav-link" {% if request.endpoint == 'admin' %}aria-current="page"{% endif %} href="{{ url_for('admin') }}">Review claims</a>
+        {% endif %}
+      </nav>
+    </aside>
+    {% endif %}
+    <main id="main" tabindex="-1">{% block content %}{% endblock %}</main>
+  </div>
+  <footer class="wrap footer">Campus Lost &amp; Found</footer>
+</body>
+</html>

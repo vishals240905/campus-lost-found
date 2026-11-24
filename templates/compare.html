@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% from '_cards.html' import card %}
+{% block content %}
+<div class="page-heading"><h1>Compare reports</h1><p>{{ reasons|join(' · ') }}</p></div>
+<div class="comparison">{{ card(lost) }}{{ card(found) }}</div>
+<section class="section narrow">
+  <div class="section-heading"><h2>Ownership claim</h2></div>
+  {% if error %}<p class="notice error" role="alert">{{ error }}</p>{% endif %}
+  {% if claim %}<p class="notice"><strong>{{ claim_labels[claim.status] }}</strong> · {{ claim_steps[claim.status] }}</p>{% endif %}
+  {% if claim and claim.status != 'pending' %}
+  {% elif not available %}<p>At least one report is awaiting handover or has been returned. New claims are closed.</p>
+  {% elif eligible and not claim %}
+  <form class="panel report-form" method="post">
+    <input type="hidden" name="csrf" value="{{ g.csrf }}">
+    <label class="full">Private ownership detail
+      <textarea name="proof" rows="4" minlength="5" maxlength="1000" required>{{ proof }}</textarea>
+      <small>Describe a distinctive detail missing from the public report. The admin can see your answer.</small>
+    </label>
+    <button class="button dark">Submit claim</button>
+  </form>
+  {% elif not claim %}<p>A student can claim a match for their own lost report when another person submitted the found report.</p>{% endif %}
+</section>
+{% endblock %}

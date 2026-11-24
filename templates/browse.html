@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% from '_cards.html' import card %}
+{% block title %}Browse items | Campus Lost & Found{% endblock %}
+{% block content %}
+<section class="page-heading">
+  <h1>Browse items</h1>
+  <p>Search open lost and found reports from across campus.</p>
+</section>
+<form class="panel filters" action="{{ url_for('browse') }}">
+  <label>Search<input name="q" type="search" placeholder="Item name or keyword" value="{{ filters.q }}"></label>
+  <label>Report type<select name="kind"><option value="">All reports</option>{% for kind in ('lost', 'found') %}<option value="{{ kind }}" {% if filters.kind == kind %}selected{% endif %}>{{ kind|capitalize }}</option>{% endfor %}</select></label>
+  <label>Category<select name="category"><option value="">All categories</option>{% for option in categories %}<option {% if filters.category == option %}selected{% endif %}>{{ option }}</option>{% endfor %}</select></label>
+  <label>Location<select name="location"><option value="">All locations</option>{% for option in locations %}<option {% if filters.location == option %}selected{% endif %}>{{ option }}</option>{% endfor %}</select></label>
+  <button class="button dark">Apply filters</button>
+</form>
+<section class="section">
+  <div class="section-heading"><h2>{{ reports|length }} {{ 'report' if reports|length == 1 else 'reports' }}</h2>{% if filters.values()|select|list %}<a href="{{ url_for('browse') }}">Clear filters</a>{% endif %}</div>
+  {% if reports %}
+    <div class="grid">{% for item in reports %}{{ card(item) }}{% endfor %}</div>
+  {% else %}
+    <p class="panel">{{ 'No reports match your filters. Clear the filters or try a different search.' if filters.values()|select|list else 'There are no open reports yet.' }}</p>
+  {% endif %}
+</section>
+{% endblock %}

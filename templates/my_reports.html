@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% from '_cards.html' import card %}
+{% block content %}
+<div class="page-heading"><h1>My reports</h1><p>Signed in as {{ display_name }}. Open a report to view its suggested matches.</p></div>
+{% if deleted %}<p class="notice" role="status">Your report was deleted.</p>{% endif %}
+{% for status in ('open', 'reserved', 'returned') %}
+  {% set items = reports|selectattr('report_status', 'equalto', status)|list %}
+  {% if items %}
+  <section class="section">
+    <div class="section-heading"><h2>{{ 'Returned reports' if status == 'returned' else report_labels[status] }}</h2></div>
+    <div class="grid">{% for item in items %}{{ card(item) }}{% endfor %}</div>
+  </section>
+  {% endif %}
+{% endfor %}
+{% if not reports %}<p>Your lost and found reports will appear here.</p>{% endif %}
+<section class="section">
+  <div class="section-heading"><h2>My claims</h2></div>
+  {% for claim in claims %}
+  <article class="panel match-entry">
+    {% if claim.report_deleted %}<strong>{{ claim.name }}</strong>
+    {% else %}<a href="{{ url_for('compare', lost_id=claim.lost_id, found_id=claim.found_id) }}">{{ claim.name }}</a>{% endif %}
+    <span class="tag {{ 'found' if claim.status in ('approved','returned') else 'lost' }}">{{ claim_labels[claim.status] }}</span>
+    <p>{{ claim_steps[claim.status] }}</p>
+  </article>
+  {% else %}<p>You haven’t submitted an ownership claim.</p>{% endfor %}
+</section>
+{% endblock %}

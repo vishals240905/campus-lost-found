@@ -1,0 +1,19 @@
+[Unit]
+Description=Campus Lost and Found website
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=ec2-user
+WorkingDirectory=/home/ec2-user/campus-lost-found
+Environment=CAMPUS_PHOTO_BUCKET=campus-lost-found-photos-2409
+Environment=AWS_DEFAULT_REGION=us-east-1
+Environment=CAMPUS_DATA_DIR=/home/ec2-user/campus-lost-found/instance
+EnvironmentFile=/etc/campus-lost-found.env
+ExecStart=/home/ec2-user/campus-lost-found/.venv/bin/gunicorn --bind 127.0.0.1:8000 app:create_app()
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="narrow auth">
+  <div class="page-heading"><h1>{{ 'Create an account' if mode == 'register' else 'Student sign-in' }}</h1></div>
+  {% if registered %}<p class="notice" role="status">Your account was created. Sign in with your new username and password.</p>{% endif %}
+  {% if error %}<p class="notice error" role="alert">{{ error }}</p>{% endif %}
+  <form class="panel report-form" method="post">
+    <input type="hidden" name="csrf" value="{{ g.csrf }}">
+    {% if destination %}<input type="hidden" name="next" value="{{ destination }}">{% endif %}
+    {% if mode == 'register' %}
+    <label class="full">Full name<input name="display_name" required maxlength="80" autocomplete="name" value="{{ display_name }}"></label>
+    <label class="full">Choose a username<input name="username" required minlength="3" maxlength="40" autocomplete="username" value="{{ username }}"><small>Use letters, numbers, periods, underscores, or hyphens.</small></label>
+    <label class="full">Create a password<input type="password" name="password" required minlength="8" maxlength="128" autocomplete="new-password"><small>Use at least 8 characters.</small></label>
+    <label class="full">Confirm password<input type="password" name="confirm_password" required minlength="8" maxlength="128" autocomplete="new-password"></label>
+    {% else %}
+    <label class="full">Username<input name="username" required maxlength="40" autocomplete="username" value="{{ username }}"></label>
+    <label class="full">Password<input type="password" name="password" required maxlength="128" autocomplete="current-password"></label>
+    {% endif %}
+    <div class="actions full">
+      <button class="button dark">{{ 'Create account' if mode == 'register' else 'Sign in' }}</button>
+      <a href="{{ url_for('account', mode='sign-in' if mode == 'register' else 'register', next=destination or none) }}">{{ 'Sign in' if mode == 'register' else 'Create an account' }}</a>
+    </div>
+  </form>
+  {% if mode == 'sign-in' %}
+  <div class="staff-signin"><a href="{{ url_for('admin') }}">Sign in as admin</a></div>
+  {% endif %}
+</div>
+{% endblock %}
