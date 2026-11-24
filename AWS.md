@@ -71,8 +71,8 @@ Use a conditional write when creating claims and a DynamoDB transaction when res
 ### Connect GitHub Actions once
 
 1. Publish the source to a private GitHub repository with `main` as its default branch. Keep the repository available only to trusted collaborators. The deployment runner has access to the EC2 instance and its Learner Lab role.
-2. In GitHub, open **Settings → Actions → Runners → New self-hosted runner**. Follow GitHub's Linux x64 instructions on EC2 as `ec2-user`. Install it in a directory separate from the project. During configuration, add the custom label `campus-learner-lab`. Keep the runner registration token out of the repository. [GitHub runner setup](https://docs.github.com/en/actions/how-tos/manage-runners/self-hosted-runners/add-runners)
-3. Start the runner in its own EC2 shell with `./run.sh`. When starting Gunicorn manually for deployment, use the normal environment settings and add a PID file:
+2. The private repository's runner is registered as `campus-learner-ec2` on EC2 as `ec2-user`, in `~/campus-actions-runner`, with the custom label `campus-learner-lab`. Check its state under **Settings → Actions → Runners**. [GitHub runner setup](https://docs.github.com/en/actions/how-tos/manage-runners/self-hosted-runners/add-runners)
+3. If the runner is offline after a lab restart, start it in its own EC2 shell with `cd ~/campus-actions-runner && ./run.sh`. When starting Gunicorn manually for deployment, use the normal environment settings and add a PID file:
 
    ```bash
    .venv/bin/gunicorn --pid gunicorn.pid --bind 127.0.0.1:8000 'app:create_app()'

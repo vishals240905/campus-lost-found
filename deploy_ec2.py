@@ -67,7 +67,8 @@ def deploy():
         raise RuntimeError('Run deployment from the separate GitHub Actions checkout.')
     with (TARGET / '.deploy.lock').open('a') as lock:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        if any((SOURCE / name).read_bytes() != (TARGET / name).read_bytes() for name in REQUIREMENTS):
+        if any((SOURCE / name).read_text(encoding='utf-8') != (TARGET / name).read_text(encoding='utf-8')
+               for name in REQUIREMENTS):
             raise RuntimeError('Dependencies changed. Update the EC2 virtual environment before deploying.')
         pid = int((TARGET / 'gunicorn.pid').read_text().strip())
         proc = Path(f'/proc/{pid}')
